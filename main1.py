@@ -1,4 +1,5 @@
 import pygame
+import time
 
 W, H = 1280, 720
 window = pygame.display.set_mode((W, H))
@@ -7,12 +8,23 @@ clock = pygame.time.Clock()
 pygame.init()
 pygame.font.init()
 
-img_back = "fon.png"
+img_back = "fon.jpg"
 background = pygame.transform.scale(pygame.image.load(img_back) ,(W,H))
-
+time_current=0
+time_current=time.time()
 def game():
+    global time_current
     enemyGr.draw(window)
-    enemyGr.update()
+
+    enemy1.update()
+
+    if time.time() -time_current >= 2:
+        enemy2.update()
+        if time.time() - time_current >= 4:
+            enemy3.update()
+
+
+
 
 
 player = pygame.sprite.Sprite()
@@ -29,21 +41,20 @@ score = 0
 textX = 50
 textY = 50
 
-font = pygame.font.Font('ImpactRegular.ttf', 48)
+font = pygame.font.SysFont('Arial', 48)
+font1 = pygame.font.SysFont('Arial', 69)
 
 enemyGr = pygame.sprite.Group()
 
-f1 = pygame.font.Font(None, 36)
-text1 = f1.render('Hello Привет', True,
-                  (180, 0, 0))
-
-
-
-window.blit(text1, (10, 50))
 
 # ground = pygame.sprite.Sprite()
 # ground.image =pygame.transform.scale(pygame.image.load("ground.jpg"),(150,300))
-
+speed = 4
+def plus():
+    global score
+    global speed
+    score += 1
+    speed += 0.2
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, w, h, img, speed):
         pygame.sprite.Sprite.__init__(self)
@@ -63,13 +74,13 @@ class Enemy(pygame.sprite.Sprite):
         win.blit(self.image, self.rect)
 
 
-enemy1 = Enemy(500, H/2+30, 90, 130, 'fire.png', 4)
+enemy1 = Enemy(1500, H/2+30, 90, 130, 'fire.png', speed)
 enemyGr.add(enemy1)
-enemy2 = Enemy(850, H/2+30, 90, 130, 'fire.png', 4)
+enemy2 = Enemy(1500, H/2+30, 90, 130, 'fire.png', speed)
 enemyGr.add(enemy2)
-enemy3 = Enemy(1500, H/2+30, 90, 130, 'fire.png', 4)
+enemy3 = Enemy(1500, H/2+30, 90, 130, 'fire.png', speed)
 enemyGr.add(enemy3)
-enemy4 = Enemy(2400, H/2+30, 90, 130, 'fire.png', 4)
+enemy4 = Enemy(2400, H/2+30, 90, 130, 'fire.png', speed)
 enemyGr.add(enemy4)
 
 font_name = pygame.font.match_font('arial')
@@ -85,7 +96,10 @@ rect = pygame.Rect(40, 40, 120, 120)
 
 gameover = False
 run = True
+
+
 while run:
+
     clock.tick(100)
     acc_y = gravity
     for event in pygame.event.get():
@@ -97,6 +111,7 @@ while run:
     for enemy in enemyGr:
         if enemy.rect.x <= 0:
             enemy.rect.x = W
+            plus()
     for cos in enemyGr:
         if cos.rect.colliderect(player):
             gameover =True
@@ -104,12 +119,17 @@ while run:
     if gameover == False:
 
         window.blit(background, (0, 0))
+        text = font.render('Счёт: ' + str(score), 1, (0, 0, 0))
+        window.blit(text, (10,10))
         all_sprites.draw(window)
         pygame.display.flip()
         game()
         pygame.display.update()
     else:
-        pass
+        over = font1.render('Game Over', 1, (254, 0, 0))
+        window.blit(over, (W/2-120, H/2-100))
+        pygame.display.update()
+
     keys = pygame.key.get_pressed()
     player.rect.centerx = (player.rect.centerx + (keys[pygame.K_d] - keys[pygame.K_a]) * vel) % 1200
     player.rect.bottom = round(y)
